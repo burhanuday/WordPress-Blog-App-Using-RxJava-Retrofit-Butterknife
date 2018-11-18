@@ -3,6 +3,7 @@ package com.burhanuday.wordpressblog.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -42,10 +43,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Post post = posts.get(position);
-        holder.excerpt.setText(post.getExcerpt().getRendered());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            holder.excerpt.setText(Html.fromHtml(post.getExcerpt().getRendered(), Html.FROM_HTML_MODE_COMPACT));
+            holder.timestamp.setText(Html.fromHtml(post.getDate(), Html.FROM_HTML_MODE_COMPACT));
+            holder.title.setText(Html.fromHtml(post.getTitle().getRendered(), Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            holder.excerpt.setText(Html.fromHtml(post.getExcerpt().getRendered()));
+            holder.timestamp.setText(Html.fromHtml(post.getDate()));
+            holder.title.setText(Html.fromHtml(post.getTitle().getRendered()));
+        }
         holder.dot.setText(Html.fromHtml("&#8226;"));
         holder.dot.setTextColor(getRandomMaterialColor("400"));
-        holder.timestamp.setText(formatDate(post.getDate()));
+
     }
 
     @Override
