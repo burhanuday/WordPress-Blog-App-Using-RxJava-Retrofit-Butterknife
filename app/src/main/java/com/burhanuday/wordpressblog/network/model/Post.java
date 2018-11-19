@@ -1,5 +1,6 @@
 package com.burhanuday.wordpressblog.network.model;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -8,25 +9,28 @@ import com.google.gson.annotations.SerializedName;
 public class Post extends BaseResponse {
 
     @SerializedName("id")
-    int id;
+    private int id;
 
     @SerializedName("date")
-    String date;
+    private String date;
 
     @SerializedName("slug")
-    String slug;
+    private String slug;
 
     @SerializedName("link")
-    String link;
+    private String link;
 
     @SerializedName("title")
-    Title title;
+    private Title title;
 
     @SerializedName("content")
-    Content content;
+    private Content content;
 
     @SerializedName("excerpt")
-    Excerpt excerpt;
+    private Excerpt excerpt;
+
+    @SerializedName("_embedded")
+    private JsonObject embedded;
 
     public class Title{
         @SerializedName("rendered")
@@ -121,5 +125,13 @@ public class Post extends BaseResponse {
 
     public void setExcerpt(Excerpt excerpt) {
         this.excerpt = excerpt;
+    }
+
+    public JsonObject getEmbedded() {
+        return embedded;
+    }
+
+    public void setEmbedded(JsonObject embedded) {
+        this.embedded = embedded;
     }
 }

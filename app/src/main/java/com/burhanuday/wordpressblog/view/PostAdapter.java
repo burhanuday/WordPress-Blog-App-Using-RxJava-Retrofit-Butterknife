@@ -7,18 +7,33 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.burhanuday.wordpressblog.R;
 import com.burhanuday.wordpressblog.network.model.Post;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,15 +60,37 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
         Post post = posts.get(position);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             holder.excerpt.setText(Html.fromHtml(post.getExcerpt().getRendered(), Html.FROM_HTML_MODE_COMPACT));
-            holder.timestamp.setText(Html.fromHtml(post.getDate(), Html.FROM_HTML_MODE_COMPACT));
+            holder.timestamp.setText(Html.fromHtml(formatDate(post.getDate()), Html.FROM_HTML_MODE_COMPACT));
             holder.title.setText(Html.fromHtml(post.getTitle().getRendered(), Html.FROM_HTML_MODE_COMPACT));
         } else {
             holder.excerpt.setText(Html.fromHtml(post.getExcerpt().getRendered()));
-            holder.timestamp.setText(Html.fromHtml(post.getDate()));
+            holder.timestamp.setText(Html.fromHtml(formatDate(post.getDate())));
             holder.title.setText(Html.fromHtml(post.getTitle().getRendered()));
         }
-        holder.dot.setText(Html.fromHtml("&#8226;"));
-        holder.dot.setTextColor(getRandomMaterialColor("400"));
+        holder.thumbnail.setVisibility(View.VISIBLE);
+        try {
+            JsonObject embedded = post.getEmbedded();
+            JsonArray featured = embedded.getAsJsonArray("wp:featuredmedia");
+            JsonObject featured_1 = featured.get(0).getAsJsonObject();
+            JsonObject mediaDetails = featured_1.getAsJsonObject("media_details");
+            JsonObject sizes = mediaDetails.getAsJsonObject("sizes");
+            JsonObject thumbnail = sizes.getAsJsonObject("thumbnail");
+            String sourceUrl = thumbnail.get("source_url").getAsString();
+            Log.i("sourceUrl", sourceUrl);
+            if (!featured_1.toString().isEmpty()){
+                Glide.with(context).load(sourceUrl).into(holder.thumbnail);
+            }else {
+                holder.thumbnail.setVisibility(View.GONE);
+            }
+
+        }catch (JsonIOException je){
+            je.printStackTrace();
+            Toast.makeText(context, je.getMessage(), Toast.LENGTH_LONG).show();
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
 
     }
 
@@ -67,14 +104,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
         @BindView(R.id.tv_excerpt)
         TextView excerpt;
 
-        @BindView(R.id.tv_dot)
-        TextView dot;
-
         @BindView(R.id.tv_timestamp)
         TextView timestamp;
 
         @BindView(R.id.tv_title)
         TextView title;
+
+        @BindView(R.id.iv_post_image)
+        ImageView thumbnail;
 
         public MyViewHolder(View view) {
             super(view);
@@ -110,13 +147,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
      */
     private String formatDate(String dateStr) {
         try {
-            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             Date date = fmt.parse(dateStr);
             SimpleDateFormat fmtOut = new SimpleDateFormat("MMM d");
             return fmtOut.format(date);
         } catch (ParseException e) {
-
+            e.printStackTrace();
         }
+        /*
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyy", Locale.ENGLISH);
+        LocalDate date = LocalDate.parse("2018-04-10T04:00:00.000Z", inputFormatter);
+        String formattedDate = outputFormatter.format(date);
+        System.out.println(formattedDate); // prints 10-04-2018
+        */
 
         return "";
     }

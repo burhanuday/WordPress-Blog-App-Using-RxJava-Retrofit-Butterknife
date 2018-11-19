@@ -2,6 +2,7 @@ package com.burhanuday.wordpressblog.view;
 
 import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -47,7 +48,8 @@ public class Home extends AppCompatActivity {
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private PostAdapter mAdapter;
     private List<Post> postsList = new ArrayList<>();
-
+    private int currentPage=1;
+    private boolean isLoading = false;
 
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
@@ -78,7 +80,6 @@ public class Home extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration(this, LinearLayoutManager.VERTICAL, 16));
         recyclerView.setAdapter(mAdapter);
-
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this,
                 recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
@@ -91,28 +92,26 @@ public class Home extends AppCompatActivity {
 
             }
         }));
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                //super.onScrolled(recyclerView, dx, dy);
+                if (!recyclerView.canScrollVertically(1)){
+                    fetchNextPage();
+                }
+            }
+        });
 
         fetchAllPosts();
     }
 
     private void fetchAllPosts(){
+        isLoading = true;
+        Log.i("fetching", String.valueOf(currentPage));
         compositeDisposable.add(
-                apiService.fetchAllPosts()
+                apiService.fetchAllPosts(currentPage)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Function<List<Post>, List<Post>>() {
-                    @Override
-                    public List<Post> apply(List<Post> posts) throws Exception {
-                        Collections.sort(posts, new Comparator<Post>() {
-                            @Override
-                            public int compare(Post o1, Post o2) {
-                                return o2.getId() - o1.getId();
-                            }
-                        });
-
-                        return posts;
-                    }
-                })
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
 
                     @Override
@@ -120,8 +119,9 @@ public class Home extends AppCompatActivity {
                         postsList.clear();
                         postsList.addAll(posts);
                         mAdapter.notifyDataSetChanged();
-
                         toggleEmptyPosts();
+                        currentPage++;
+                        isLoading = false;
                     }
 
                     @Override
@@ -130,6 +130,35 @@ public class Home extends AppCompatActivity {
                         showError(e);
                     }
                 })
+        );
+    }
+
+    private void fetchNextPage(){
+        if (isLoading){
+            return;
+        }
+        Log.i("fetching", String.valueOf(currentPage));
+        compositeDisposable.add(
+                apiService.fetchAllPosts(currentPage)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeWith(new DisposableSingleObserver<List<Post>>(){
+
+                            @Override
+                            public void onSuccess(List<Post> posts) {
+                                currentPage++;
+                                postsList.addAll(posts);
+                                mAdapter.notifyDataSetChanged();
+                                toggleEmptyPosts();
+                                isLoading = false;
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.e(TAG, "onError: " + e.getMessage());
+                                showError(e);
+                            }
+                        })
         );
     }
 
