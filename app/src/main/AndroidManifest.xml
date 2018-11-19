@@ -23,7 +23,8 @@
         <activity
             android:name=".view.Home"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".view.DisplayPost"></activity>
+        <activity android:name=".view.DisplayPost"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

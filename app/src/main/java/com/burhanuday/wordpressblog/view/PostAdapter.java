@@ -77,7 +77,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
             JsonObject thumbnail = sizes.getAsJsonObject("thumbnail");
             String sourceUrl = thumbnail.get("source_url").getAsString();
             Log.i("sourceUrl", sourceUrl);
-            if (!featured_1.toString().isEmpty()){
+            if (!sourceUrl.isEmpty()){
                 Glide.with(context).load(sourceUrl).into(holder.thumbnail);
             }else {
                 holder.thumbnail.setVisibility(View.GONE);
@@ -85,10 +85,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
 
         }catch (JsonIOException je){
             je.printStackTrace();
-            Toast.makeText(context, je.getMessage(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, je.getMessage(), Toast.LENGTH_LONG).show();
         }catch (Exception e){
             e.printStackTrace();
-            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
 
@@ -142,8 +142,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
 
     /**
      * Formatting timestamp to `MMM d` format
-     * Input: 2018-02-21 00:15:42
-     * Output: Feb 21
      */
     private String formatDate(String dateStr) {
         try {
@@ -154,13 +152,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        /*
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH);
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyy", Locale.ENGLISH);
-        LocalDate date = LocalDate.parse("2018-04-10T04:00:00.000Z", inputFormatter);
-        String formattedDate = outputFormatter.format(date);
-        System.out.println(formattedDate); // prints 10-04-2018
-        */
 
         return "";
     }

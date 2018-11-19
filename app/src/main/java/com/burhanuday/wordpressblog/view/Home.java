@@ -1,5 +1,6 @@
 package com.burhanuday.wordpressblog.view;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -85,6 +86,12 @@ public class Home extends AppCompatActivity {
             @Override
             public void onClick(View view, int position) {
                 // open full post
+                Post post = postsList.get(position);
+                int index = post.getId();
+                Intent showFullScreen = new Intent(Home.this, DisplayPost.class);
+                showFullScreen.putExtra("_id", index);
+                showFullScreen.putExtra("_link", post.getLink());
+                startActivity(showFullScreen);
             }
 
             @Override
@@ -156,7 +163,6 @@ public class Home extends AppCompatActivity {
                             @Override
                             public void onError(Throwable e) {
                                 Log.e(TAG, "onError: " + e.getMessage());
-                                showError(e);
                             }
                         })
         );
