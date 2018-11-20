@@ -110,6 +110,9 @@ public class Home extends AppCompatActivity {
         });
 
         fetchAllPosts();
+
+        Intent showSplashScreen = new Intent(Home.this, SplashScreen.class);
+        startActivity(showSplashScreen);
     }
 
     private void fetchAllPosts(){
@@ -135,6 +138,7 @@ public class Home extends AppCompatActivity {
                     public void onError(Throwable e) {
                         Log.e(TAG, "onError: " + e.getMessage());
                         showError(e);
+                        isLoading = false;
                     }
                 })
         );
@@ -163,6 +167,7 @@ public class Home extends AppCompatActivity {
                             @Override
                             public void onError(Throwable e) {
                                 Log.e(TAG, "onError: " + e.getMessage());
+                                isLoading = false;
                             }
                         })
         );
