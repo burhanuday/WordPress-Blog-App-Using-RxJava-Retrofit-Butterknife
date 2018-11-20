@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.DisplayPost">
+    android:id="@+id/linearLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <WebView
-        android:id="@+id/wv_body"
+    <com.asksira.webviewsuite.WebViewSuite
+        android:id="@+id/webViewSuite"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:url="@string/url"
+        app:webViewProgressBarStyle="linear"
+        app:inflationDelay="100"
+        app:enableJavaScript="false"
+        app:overrideTelLink="true"
+        app:overrideEmailLink="true"
+        app:overridePdfLink="true"
+        app:showZoomControl="false"
+        app:enableVerticalScrollBar="false"
+        app:enableHorizontalScrollBar="false"/>
+
+
 </android.support.constraint.ConstraintLayout>
