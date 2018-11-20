@@ -1,5 +1,6 @@
 package com.burhanuday.wordpressblog.network;
 
+import com.burhanuday.wordpressblog.network.model.Category;
 import com.burhanuday.wordpressblog.network.model.Media;
 import com.burhanuday.wordpressblog.network.model.Post;
 
@@ -22,6 +23,6 @@ public interface ApiService{
     @GET("posts/{id}")
     Single<Post> getPostById(@Path("id") int postId);
 
-    @GET("media/{featured_media}")
-    Call<Media> getPostThumbnail(@Path("featured_media") int media);
+    @GET("categories")
+    Single<List<Category>> getAllCategories();
 }

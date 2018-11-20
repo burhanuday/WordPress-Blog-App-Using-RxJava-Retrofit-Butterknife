@@ -1,10 +1,13 @@
 package com.burhanuday.wordpressblog.view;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -13,36 +16,32 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-
 import com.burhanuday.wordpressblog.R;
 import com.burhanuday.wordpressblog.network.ApiClient;
 import com.burhanuday.wordpressblog.network.ApiService;
+import com.burhanuday.wordpressblog.network.model.Category;
 import com.burhanuday.wordpressblog.network.model.Post;
 import com.burhanuday.wordpressblog.utils.MyDividerItemDecoration;
 import com.burhanuday.wordpressblog.utils.RecyclerTouchListener;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
+import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.HttpException;
 
-public class Home extends AppCompatActivity {
+public class Home extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = Home.class.getSimpleName();
     private ApiService apiService;
@@ -51,6 +50,8 @@ public class Home extends AppCompatActivity {
     private List<Post> postsList = new ArrayList<>();
     private int currentPage=1;
     private boolean isLoading = false;
+    private List<Category> categoryList = new ArrayList<>();
+    private ActionBarDrawerToggle toggle;
 
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
@@ -60,6 +61,12 @@ public class Home extends AppCompatActivity {
 
     @BindView(R.id.txt_empty_notes_view)
     TextView noNotesView;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+
+    @BindView(R.id.nv)
+    NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +80,13 @@ public class Home extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.activity_title_home));
         setSupportActionBar(toolbar);
+
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open_drawer, R.string.close_drawer);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        navigationView.setNavigationItemSelectedListener(this);
 
         apiService = ApiClient.getClient(getApplicationContext()).create(ApiService.class);
         mAdapter = new PostAdapter(this, postsList);
@@ -108,11 +122,36 @@ public class Home extends AppCompatActivity {
                 }
             }
         });
-
+        fetchCategories();
         fetchAllPosts();
 
         Intent showSplashScreen = new Intent(Home.this, SplashScreen.class);
         startActivity(showSplashScreen);
+    }
+
+    private void fetchCategories(){
+        Log.i("fetching", "start fetching categories");
+        compositeDisposable.add(
+                apiService.getAllCategories()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<List<Category>>(){
+                    @Override
+                    public void onSuccess(List<Category> categories) {
+                        categoryList.clear();
+                        categoryList.addAll(categories);
+                        Menu menu = navigationView.getMenu();
+                        for (Category category: categories){
+                            menu.add(category.getName());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: " + e.getMessage());
+                    }
+                })
+        );
     }
 
     private void fetchAllPosts(){
@@ -123,7 +162,6 @@ public class Home extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
-
                     @Override
                     public void onSuccess(List<Post> posts) {
                         postsList.clear();
@@ -181,15 +219,6 @@ public class Home extends AppCompatActivity {
         }
     }
 
-    private void whiteNotificationBar(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int flags = view.getSystemUiVisibility();
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            view.setSystemUiVisibility(flags);
-            getWindow().setStatusBarColor(Color.WHITE);
-        }
-    }
-
     private void showError(Throwable e) {
         String message = "";
         try {
@@ -219,5 +248,31 @@ public class Home extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         compositeDisposable.dispose();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        int id = menuItem.getItemId();
+        switch (id){
+
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (toggle.onOptionsItemSelected(item))
+            return true;
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            this.drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

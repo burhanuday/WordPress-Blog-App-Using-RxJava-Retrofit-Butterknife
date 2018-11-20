@@ -7,8 +7,9 @@ import com.google.gson.annotations.SerializedName;
  * Created by burhanuday on 20-11-2018.
  */
 public class Category extends BaseResponse {
+
     @SerializedName("id")
-    private String id;
+    private int id;
 
     @SerializedName("link")
     private String link;
@@ -19,12 +20,23 @@ public class Category extends BaseResponse {
     @SerializedName("_links")
     private JsonObject _links;
 
-    public String getId() {
+    @SerializedName("count")
+    private int count;
+
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public String getLink() {
