@@ -11,6 +11,9 @@ public class Category extends BaseResponse {
     @SerializedName("id")
     private int id;
 
+    @SerializedName("slug")
+    private String slug;
+
     @SerializedName("link")
     private String link;
 
@@ -61,6 +64,14 @@ public class Category extends BaseResponse {
 
     public void set_links(JsonObject _links) {
         this._links = _links;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
 

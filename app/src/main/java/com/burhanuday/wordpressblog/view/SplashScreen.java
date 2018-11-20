@@ -10,6 +10,13 @@ import com.burhanuday.wordpressblog.view.Home;
 
 public class SplashScreen extends AppCompatActivity {
 
+    /**
+     * Stay visible on the screen for DISPLAY_TIME seconds then finish
+     * @param savedInstanceState
+     */
+
+    private static final Long DISPLAY_TIME = 1000L;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +28,7 @@ public class SplashScreen extends AppCompatActivity {
             public void run() {
                 finish();
             }
-        }, 1000);
+        }, DISPLAY_TIME);
 
     }
 }

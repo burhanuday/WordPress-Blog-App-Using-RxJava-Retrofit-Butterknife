@@ -17,6 +17,12 @@ public class ApiClient {
     private static final int REQUEST_TIMEOUT = 60;
     private static OkHttpClient okHttpClient;
 
+    /**
+     * Return the instance of Retrofit
+     * @param context
+     * @return
+     */
+
     public static Retrofit getClient(Context context) {
         if (okHttpClient == null)
             initOkHttp(context);
@@ -31,6 +37,11 @@ public class ApiClient {
         }
         return retrofit;
     }
+
+    /**
+     * initialise OkHttp Client
+     * @param context
+     */
 
     private static void initOkHttp(final Context context) {
         OkHttpClient.Builder httpClient = new OkHttpClient().newBuilder()

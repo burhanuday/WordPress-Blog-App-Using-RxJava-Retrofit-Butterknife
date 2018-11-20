@@ -26,6 +26,7 @@ import com.burhanuday.wordpressblog.network.ApiService;
 import com.burhanuday.wordpressblog.network.model.Category;
 import com.burhanuday.wordpressblog.network.model.Post;
 import com.burhanuday.wordpressblog.utils.MyDividerItemDecoration;
+import com.burhanuday.wordpressblog.utils.PostAdapter;
 import com.burhanuday.wordpressblog.utils.RecyclerTouchListener;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,6 +130,10 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         startActivity(showSplashScreen);
     }
 
+    /**
+     * fetch names of categories to add them dynamically to navigation drawer
+     */
+
     private void fetchCategories(){
         Log.i("fetching", "start fetching categories");
         compositeDisposable.add(
@@ -153,6 +158,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                 })
         );
     }
+
+    /**
+     * loads posts from page 1
+     * clears list
+     */
 
     private void fetchAllPosts(){
         isLoading = true;
@@ -182,6 +192,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         );
     }
 
+    /**
+     * used for pagination
+     * loads posts from the page currentPage
+     */
+
     private void fetchNextPage(){
         if (isLoading){
             return;
@@ -210,6 +225,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         })
         );
     }
+
+    /**
+     * Check if list size is 0
+     * show empty view if size is 0
+     */
 
     private void toggleEmptyPosts() {
         if (postsList.size() > 0) {
@@ -250,14 +270,58 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         compositeDisposable.dispose();
     }
 
+    /**
+     * ItemListener to listen events on Navigation Drawer
+     * @param menuItem
+     * @return
+     */
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         int id = menuItem.getItemId();
-        switch (id){
+        String title = (String) menuItem.getTitle();
 
+        Category category = null;
+        for (Category category1 : categoryList){
+            if (category1.getName().equals(title)){
+                category = category1;
+            }
         }
 
+        assert category != null;
+        fetchByCategory(category.getSlug());
+
         return true;
+    }
+
+    /**
+     * fetch list of posts when the category name is provided
+     * @param slug = unique name of category
+     */
+
+    private void fetchByCategory(String slug){
+        if (slug == null){
+            return;
+        }
+        Log.i("fetching", "by category");
+        compositeDisposable.add(
+                apiService.fetchPostsByCategory(1, slug)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<List<Post>>(){
+                    @Override
+                    public void onSuccess(List<Post> posts) {
+                        for (Post post : posts){
+                            Log.i("fetching", post.getTitle().getRendered() + "by category");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("fetching", "Error: " + e.getMessage());
+                    }
+                })
+        );
     }
 
     @Override
@@ -266,6 +330,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             return true;
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * Override onBackPressed to close drawer when the back button
+     * is pressed
+     */
 
     @Override
     public void onBackPressed() {
