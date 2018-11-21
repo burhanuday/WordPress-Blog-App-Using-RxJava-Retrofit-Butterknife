@@ -21,7 +21,7 @@ public interface ApiService{
     Single<List<Post>> fetchAllPosts(@Query("page") int pageNo);
 
     @GET("posts?&_embed")
-    Single<List<Post>> fetchPostsByCategory(@Query("page") int pageNo, @Query("category") String category);
+    Single<List<Post>> fetchPostsByCategory(@Query("page") int pageNo, @Query("categories") int category);
 
     @GET("posts/{id}")
     Single<Post> getPostById(@Path("id") int postId);

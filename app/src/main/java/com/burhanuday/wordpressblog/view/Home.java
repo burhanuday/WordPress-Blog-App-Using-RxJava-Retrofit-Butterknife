@@ -53,6 +53,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     private boolean isLoading = false;
     private List<Category> categoryList = new ArrayList<>();
     private ActionBarDrawerToggle toggle;
+    private boolean categoryMode = false;
+    private int categoryId;
 
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
@@ -79,7 +81,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         ButterKnife.bind(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(getString(R.string.activity_title_home));
+        toolbar.setTitle("All posts");
         setSupportActionBar(toolbar);
 
         toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open_drawer, R.string.close_drawer);
@@ -119,7 +121,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 //super.onScrolled(recyclerView, dx, dy);
                 if (!recyclerView.canScrollVertically(1)){
-                    fetchNextPage();
+                    if (!categoryMode){
+                        fetchNextPage();
+                    }else {
+                        fetchNextByCategory();
+                    }
                 }
             }
         });
@@ -165,6 +171,10 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
      */
 
     private void fetchAllPosts(){
+        if (isLoading){
+            return;
+        }
+        currentPage = 1;
         isLoading = true;
         Log.i("fetching", String.valueOf(currentPage));
         compositeDisposable.add(
@@ -201,6 +211,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         if (isLoading){
             return;
         }
+        isLoading = true;
         Log.i("fetching", String.valueOf(currentPage));
         compositeDisposable.add(
                 apiService.fetchAllPosts(currentPage)
@@ -280,16 +291,23 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         int id = menuItem.getItemId();
         String title = (String) menuItem.getTitle();
-
+        getSupportActionBar().setTitle(title);
+        if (title.equals("All posts")){
+            fetchAllPosts();
+            categoryMode = false;
+            return true;
+        }
         Category category = null;
         for (Category category1 : categoryList){
             if (category1.getName().equals(title)){
                 category = category1;
             }
         }
-
+        categoryMode = true;
         assert category != null;
-        fetchByCategory(category.getSlug());
+        fetchByCategory(category.getId());
+        Log.i("fetching", "slug is: " + category.getSlug());
+        this.categoryId = category.getId();
 
         return true;
     }
@@ -299,26 +317,68 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
      * @param slug = unique name of category
      */
 
-    private void fetchByCategory(String slug){
-        if (slug == null){
+    private void fetchByCategory(int slug){
+        if (isLoading){
             return;
         }
-        Log.i("fetching", "by category");
+        isLoading = true;
+        currentPage = 1;
+        Log.i("fetching", String.valueOf(currentPage) + " by category");
         compositeDisposable.add(
-                apiService.fetchPostsByCategory(1, slug)
+                apiService.fetchPostsByCategory(currentPage, slug)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
                     @Override
                     public void onSuccess(List<Post> posts) {
-                        for (Post post : posts){
-                            Log.i("fetching", post.getTitle().getRendered() + "by category");
+                        for (Post post : posts) {
+                            Log.i("fetching", post.getTitle().getRendered() + " by category");
                         }
+                            postsList.clear();
+                            postsList.addAll(posts);
+                            mAdapter.notifyDataSetChanged();
+                            toggleEmptyPosts();
+                            currentPage++;
+                            isLoading = false;
+
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.e("fetching", "Error: " + e.getMessage());
+                        isLoading = false;
+                    }
+                })
+        );
+    }
+
+    /**
+     * paginate posts when loading posts by category
+     */
+    private void fetchNextByCategory(){
+        if (isLoading){
+            return;
+        }
+        isLoading = true;
+        Log.i("fetching", String.valueOf(currentPage) + " by category");
+        compositeDisposable.add(
+                apiService.fetchPostsByCategory(currentPage, categoryId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableSingleObserver<List<Post>>(){
+                    @Override
+                    public void onSuccess(List<Post> posts) {
+                        currentPage++;
+                        postsList.addAll(posts);
+                        mAdapter.notifyDataSetChanged();
+                        toggleEmptyPosts();
+                        isLoading = false;
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.i("fetching", "Error: " + e.getMessage());
+                        isLoading = false;
                     }
                 })
         );
