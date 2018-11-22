@@ -1,8 +1,12 @@
 package com.burhanuday.wordpressblog.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.design.internal.NavigationMenu;
+import android.support.design.internal.NavigationMenuItemView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,7 +23,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ActionMenuView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.burhanuday.wordpressblog.R;
 import com.burhanuday.wordpressblog.network.ApiClient;
 import com.burhanuday.wordpressblog.network.ApiService;
@@ -163,8 +170,12 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         categoryList.clear();
                         categoryList.addAll(categories);
                         Menu menu = navigationView.getMenu();
+                        int i=0;
                         for (Category category: categories){
                             menu.add(category.getName());
+                            menu.getItem(i).setActionView(R.layout.navigation_item_row);
+                            setMenuCounter(i, category.getCount());
+                            i++;
                         }
                     }
 
@@ -175,6 +186,12 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                 })
         );
     }
+
+    private void setMenuCounter(int item, int count){
+        TextView view = (TextView) navigationView.getMenu().getItem(item).getActionView();
+        view.setText(count > 0 ? String.valueOf(count) : null);
+    }
+
 
     /**
      * loads posts from page 1
