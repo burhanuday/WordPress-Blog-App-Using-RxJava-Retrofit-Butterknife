@@ -170,7 +170,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         categoryList.clear();
                         categoryList.addAll(categories);
                         Menu menu = navigationView.getMenu();
-                        int i=0;
+                        int i=1;
                         for (Category category: categories){
                             menu.add(category.getName());
                             menu.getItem(i).setActionView(R.layout.navigation_item_row);
@@ -191,7 +191,6 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         TextView view = (TextView) navigationView.getMenu().getItem(item).getActionView();
         view.setText(count > 0 ? String.valueOf(count) : null);
     }
-
 
     /**
      * loads posts from page 1
