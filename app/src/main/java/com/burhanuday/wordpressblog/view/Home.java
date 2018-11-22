@@ -2,13 +2,16 @@ package com.burhanuday.wordpressblog.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.internal.NavigationMenuItemView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -18,12 +21,14 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ActionMenuView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +86,9 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     @BindView(R.id.nv)
     NavigationView navigationView;
 
+    @BindView(R.id.home_progress)
+    ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,11 +122,23 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             public void onClick(View view, int position) {
                 // open full post
                 Post post = postsList.get(position);
+                /*
                 int index = post.getId();
                 Intent showFullScreen = new Intent(Home.this, DisplayPost.class);
                 showFullScreen.putExtra("_id", index);
                 showFullScreen.putExtra("_link", post.getLink());
                 startActivity(showFullScreen);
+                */
+                Context context = Home.this;
+                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                //builder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left);
+                //builder.setExitAnimations(context, R.anim.slide_in_left, R.anim.slide_out_right);
+                builder.setToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                builder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                builder.enableUrlBarHiding();
+                CustomTabsIntent intent = builder.build();
+                intent.intent.setPackage("com.android.chrome");
+                intent.launchUrl(context, Uri.parse(post.getLink()));
             }
 
             @Override
@@ -220,6 +240,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         mAdapter.notifyDataSetChanged();
                         toggleEmptyPosts();
                         currentPage++;
+                        progressBar.setVisibility(View.GONE);
                     }
 
                     @Override
@@ -229,6 +250,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         isLoading = false;
                         mAdapter.showLoading(false);
                         mAdapter.notifyDataSetChanged();
+                        progressBar.setVisibility(View.GONE);
                     }
                 })
         );
@@ -327,7 +349,10 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         recyclerViewScrollListener.onDataCleared();
+        postsList.clear();
+        mAdapter.notifyDataSetChanged();
         int id = menuItem.getItemId();
+        progressBar.setVisibility(View.VISIBLE);
         String title = (String) menuItem.getTitle();
         getSupportActionBar().setTitle(title);
         if (title.equals("All posts")){
@@ -386,6 +411,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                             mAdapter.notifyDataSetChanged();
                             toggleEmptyPosts();
                             currentPage++;
+                        progressBar.setVisibility(View.GONE);
 
                     }
 
@@ -395,6 +421,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         isLoading = false;
                         mAdapter.showLoading(false);
                         mAdapter.notifyDataSetChanged();
+                        progressBar.setVisibility(View.GONE);
                     }
                 })
         );

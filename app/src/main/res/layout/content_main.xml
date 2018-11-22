@@ -7,6 +7,15 @@
     tools:context="com.burhanuday.wordpressblog.view.Home"
     tools:showIn="@layout/activity_home">
 
+    <ProgressBar
+        android:id="@+id/home_progress"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"

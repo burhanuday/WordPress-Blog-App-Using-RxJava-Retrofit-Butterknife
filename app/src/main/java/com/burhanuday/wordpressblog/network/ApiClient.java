@@ -2,9 +2,18 @@ package com.burhanuday.wordpressblog.network;
 
 import android.content.Context;
 import com.burhanuday.wordpressblog.app.Const;
+import com.burhanuday.wordpressblog.utils.Util;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import butterknife.internal.Utils;
+import okhttp3.Cache;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -44,7 +53,12 @@ public class ApiClient {
      */
 
     private static void initOkHttp(final Context context) {
+        File httpCacheDirectory = new File(context.getCacheDir(), "HttpCache");
+        int cacheSize = 10 * 1024 * 1024; // 10 MiB
+        Cache cache = new Cache(httpCacheDirectory, cacheSize);
+
         OkHttpClient.Builder httpClient = new OkHttpClient().newBuilder()
+                .cache(cache)
                 .connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS);
