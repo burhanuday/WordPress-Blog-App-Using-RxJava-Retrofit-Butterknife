@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.burhanuday.wordpressblog.R;
@@ -30,22 +31,46 @@ import butterknife.ButterKnife;
 /**
  * Created by burhanuday on 18-11-2018.
  */
-public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> {
+public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private List<Post> posts;
+    protected boolean showLoader;
+    private static final int VIEWTYPE_ITEM = 1;
+    private static final int VIEWTYPE_LOADER = 2;
+    protected LayoutInflater mInflater;
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.post_list_row, parent, false);
-
-        return new MyViewHolder(itemView);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEWTYPE_LOADER){
+            Log.i("adapter", "loader viewtype found");
+            View view = mInflater.inflate(R.layout.loader_item_layout, parent, false);
+            return new LoaderViewHolder(view);
+        }else if (viewType == VIEWTYPE_ITEM){
+            View itemView = mInflater.inflate(R.layout.post_list_row, parent, false);
+            return new MyViewHolder(itemView);
+        }
+        throw new IllegalArgumentException("Invalid viewType " + viewType);
     }
 
+
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        if (viewHolder instanceof LoaderViewHolder){
+            Log.i("adapter", "instance of loader");
+            LoaderViewHolder loaderViewHolder = (LoaderViewHolder) viewHolder;
+            if (showLoader){
+                Log.i("adapter", "loader visibility set to true");
+                loaderViewHolder.mProgressBar.setVisibility(View.VISIBLE);
+            }else {
+                Log.i("adapter", "loader visibility set to false");
+                loaderViewHolder.mProgressBar.setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        MyViewHolder holder = (MyViewHolder)viewHolder;
         Post post = posts.get(position);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             holder.excerpt.setText(Html.fromHtml(post.getExcerpt().getRendered(), Html.FROM_HTML_MODE_COMPACT));
@@ -84,8 +109,34 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
     }
 
     @Override
+    public int getItemViewType(int position) {
+        // loader can't be at position 0
+        // loader can only be at the last position
+        if (position != 0 && position == getItemCount() - 1) {
+            return VIEWTYPE_LOADER;
+        }
+
+        return VIEWTYPE_ITEM;
+    }
+
+    public void showLoading(boolean status) {
+        showLoader = status;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        if (position!=0 && position == getItemCount()-1){
+            return -1;
+        }
+        return posts.get(position).getId();
+    }
+
+    @Override
     public int getItemCount() {
-        return posts.size();
+        if (posts == null || posts.size() == 0){
+            return 0;
+        }
+        return posts.size()+1;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -108,9 +159,21 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
         }
     }
 
+    public class LoaderViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.progressbar)
+        ProgressBar mProgressBar;
+
+        public LoaderViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
     public PostAdapter(Context context, List<Post> posts){
         this.context = context;
         this.posts = posts;
+        mInflater = LayoutInflater.from(context);
     }
 
     /**

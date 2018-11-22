@@ -28,6 +28,8 @@ import com.burhanuday.wordpressblog.network.model.Post;
 import com.burhanuday.wordpressblog.utils.MyDividerItemDecoration;
 import com.burhanuday.wordpressblog.utils.PostAdapter;
 import com.burhanuday.wordpressblog.utils.RecyclerTouchListener;
+import com.burhanuday.wordpressblog.utils.RecyclerViewScrollListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
@@ -55,6 +57,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     private ActionBarDrawerToggle toggle;
     private boolean categoryMode = false;
     private int categoryId;
+    private RecyclerViewScrollListener recyclerViewScrollListener;
 
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
@@ -116,19 +119,27 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
 
             }
         }));
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerViewScrollListener = new RecyclerViewScrollListener() {
             @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                //super.onScrolled(recyclerView, dx, dy);
-                if (!recyclerView.canScrollVertically(1)){
-                    if (!categoryMode){
-                        fetchNextPage();
-                    }else {
-                        fetchNextByCategory();
-                    }
+            public void onScrollUp() {
+
+            }
+
+            @Override
+            public void onScrollDown() {
+
+            }
+
+            @Override
+            public void onLoadMore() {
+                if (!categoryMode){
+                    fetchNextPage();
+                }else {
+                    fetchNextByCategory();
                 }
             }
-        });
+        };
+        recyclerView.addOnScrollListener(recyclerViewScrollListener);
         fetchCategories();
         fetchAllPosts();
 
@@ -174,6 +185,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         if (isLoading){
             return;
         }
+        mAdapter.showLoading(true);
+        mAdapter.notifyDataSetChanged();
         currentPage = 1;
         isLoading = true;
         Log.i("fetching", String.valueOf(currentPage));
@@ -186,10 +199,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                     public void onSuccess(List<Post> posts) {
                         postsList.clear();
                         postsList.addAll(posts);
+                        isLoading = false;
+                        mAdapter.showLoading(false);
                         mAdapter.notifyDataSetChanged();
                         toggleEmptyPosts();
                         currentPage++;
-                        isLoading = false;
                     }
 
                     @Override
@@ -197,6 +211,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         Log.e(TAG, "onError: " + e.getMessage());
                         showError(e);
                         isLoading = false;
+                        mAdapter.showLoading(false);
+                        mAdapter.notifyDataSetChanged();
                     }
                 })
         );
@@ -211,6 +227,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         if (isLoading){
             return;
         }
+        mAdapter.showLoading(true);
+        mAdapter.notifyDataSetChanged();
         isLoading = true;
         Log.i("fetching", String.valueOf(currentPage));
         compositeDisposable.add(
@@ -223,15 +241,18 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                             public void onSuccess(List<Post> posts) {
                                 currentPage++;
                                 postsList.addAll(posts);
+                                isLoading = false;
+                                mAdapter.showLoading(false);
                                 mAdapter.notifyDataSetChanged();
                                 toggleEmptyPosts();
-                                isLoading = false;
                             }
 
                             @Override
                             public void onError(Throwable e) {
                                 Log.e(TAG, "onError: " + e.getMessage());
                                 isLoading = false;
+                                mAdapter.showLoading(false);
+                                mAdapter.notifyDataSetChanged();
                             }
                         })
         );
@@ -289,12 +310,16 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        recyclerViewScrollListener.onDataCleared();
         int id = menuItem.getItemId();
         String title = (String) menuItem.getTitle();
         getSupportActionBar().setTitle(title);
         if (title.equals("All posts")){
             fetchAllPosts();
             categoryMode = false;
+            if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                this.drawerLayout.closeDrawer(GravityCompat.START);
+            }
             return true;
         }
         Category category = null;
@@ -308,7 +333,9 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         fetchByCategory(category.getId());
         Log.i("fetching", "slug is: " + category.getSlug());
         this.categoryId = category.getId();
-
+        if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            this.drawerLayout.closeDrawer(GravityCompat.START);
+        }
         return true;
     }
 
@@ -322,6 +349,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             return;
         }
         isLoading = true;
+        mAdapter.showLoading(true);
+        mAdapter.notifyDataSetChanged();
         currentPage = 1;
         Log.i("fetching", String.valueOf(currentPage) + " by category");
         compositeDisposable.add(
@@ -336,10 +365,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         }
                             postsList.clear();
                             postsList.addAll(posts);
+                        isLoading = false;
+                        mAdapter.showLoading(false);
                             mAdapter.notifyDataSetChanged();
                             toggleEmptyPosts();
                             currentPage++;
-                            isLoading = false;
 
                     }
 
@@ -347,6 +377,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                     public void onError(Throwable e) {
                         Log.e("fetching", "Error: " + e.getMessage());
                         isLoading = false;
+                        mAdapter.showLoading(false);
+                        mAdapter.notifyDataSetChanged();
                     }
                 })
         );
@@ -360,6 +392,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             return;
         }
         isLoading = true;
+        mAdapter.showLoading(true);
+        mAdapter.notifyDataSetChanged();
         Log.i("fetching", String.valueOf(currentPage) + " by category");
         compositeDisposable.add(
                 apiService.fetchPostsByCategory(currentPage, categoryId)
@@ -370,15 +404,18 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                     public void onSuccess(List<Post> posts) {
                         currentPage++;
                         postsList.addAll(posts);
+                        isLoading = false;
+                        mAdapter.showLoading(false);
                         mAdapter.notifyDataSetChanged();
                         toggleEmptyPosts();
-                        isLoading = false;
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.i("fetching", "Error: " + e.getMessage());
                         isLoading = false;
+                        mAdapter.showLoading(false);
+                        mAdapter.notifyDataSetChanged();
                     }
                 })
         );
