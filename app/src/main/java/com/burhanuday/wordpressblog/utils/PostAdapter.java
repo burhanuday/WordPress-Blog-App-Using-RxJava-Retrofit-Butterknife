@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.burhanuday.wordpressblog.R;
 import com.burhanuday.wordpressblog.network.model.Post;
 import com.google.gson.JsonArray;
@@ -24,6 +25,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +34,7 @@ import butterknife.ButterKnife;
 /**
  * Created by burhanuday on 18-11-2018.
  */
+
 public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
@@ -92,7 +96,13 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             String sourceUrl = thumbnail.get("source_url").getAsString();
             Log.i("sourceUrl", sourceUrl);
             if (!sourceUrl.isEmpty()){
-                Glide.with(context).load(sourceUrl).into(holder.thumbnail);
+                GlideApp.with(context)
+                        .load(sourceUrl)
+                        .fitCenter()
+                        .placeholder(R.drawable.burhanuday_logo)
+                        .thumbnail(0.5f)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(holder.thumbnail);
             }else {
                 holder.thumbnail.setVisibility(View.GONE);
             }
