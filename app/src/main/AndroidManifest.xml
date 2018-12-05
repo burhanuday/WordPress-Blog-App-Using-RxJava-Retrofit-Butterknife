@@ -14,19 +14,21 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".view.SplashScreen"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".view.Home"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.DisplayPost"
+        <activity
+            android:name=".view.DisplayPost"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".view.DisplayPostActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

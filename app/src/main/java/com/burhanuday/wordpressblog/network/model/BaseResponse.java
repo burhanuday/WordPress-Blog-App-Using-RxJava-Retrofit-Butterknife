@@ -1,5 +1,7 @@
 package com.burhanuday.wordpressblog.network.model;
 
+import java.io.Serializable;
+
 /**
  * Created by burhanuday on 18-11-2018.
  */

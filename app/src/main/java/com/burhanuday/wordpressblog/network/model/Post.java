@@ -3,6 +3,8 @@ package com.burhanuday.wordpressblog.network.model;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by burhanuday on 18-11-2018.
  */

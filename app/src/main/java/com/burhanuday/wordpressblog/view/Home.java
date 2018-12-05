@@ -128,7 +128,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                 showFullScreen.putExtra("_id", index);
                 showFullScreen.putExtra("_link", post.getLink());
                 startActivity(showFullScreen);
-                */
+
                 Context context = Home.this;
                 CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                 //builder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left);
@@ -139,6 +139,11 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                 CustomTabsIntent intent = builder.build();
                 intent.intent.setPackage("com.android.chrome");
                 intent.launchUrl(context, Uri.parse(post.getLink()));
+                */
+
+                Intent startNativeDisplayPostActivity = new Intent(Home.this, DisplayPostActivity.class);
+                startNativeDisplayPostActivity.putExtra("post_id", post.getId());
+                startActivity(startNativeDisplayPostActivity);
             }
 
             @Override
