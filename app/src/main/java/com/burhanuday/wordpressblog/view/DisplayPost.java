@@ -28,6 +28,8 @@ public class DisplayPost extends AppCompatActivity {
     @BindView(R.id.webViewSuite)
     WebViewSuite webViewSuite;
 
+    private String content;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +43,6 @@ public class DisplayPost extends AppCompatActivity {
         int id = getIntent().getIntExtra("_id", 0);
         String link = getIntent().getStringExtra("_link");
 
-        webViewSuite.startLoading(link);
         webViewSuite.interfereWebViewSetup(new WebViewSuite.WebViewSetupInterference() {
             @Override
             public void interfereWebViewSetup(WebView webView) {
@@ -60,16 +61,25 @@ public class DisplayPost extends AppCompatActivity {
                 settings.setSaveFormData(false);
                 settings.setSavePassword(false);
                 settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+                settings.setLoadsImagesAutomatically(true);
                 // Flash settings
                 settings.setPluginState(WebSettings.PluginState.ON);
             }
         });
+        content = getIntent().getStringExtra("post_content");
         webViewSuite.setOpenPDFCallback(new WebViewSuite.WebViewOpenPDFCallback() {
             @Override
             public void onOpenPDF() {
                 finish();
             }
         });
+        content = content.replaceAll("\\\\n", "").
+                replaceAll("\\\\r", "").replaceAll("\\\\", "");
+
+        content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" +
+                "<script src=\"prism.js\"></script>" +
+                "<div class=\"content\">" + content+ "</div>";
+        //webViewSuite.startLoadData("file:///android_asset/*",content, "text/html; charset=utf-8", "UTF-8");
 
     }
 

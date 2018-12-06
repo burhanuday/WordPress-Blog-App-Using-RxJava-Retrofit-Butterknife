@@ -18,10 +18,10 @@ import retrofit2.http.Query;
 
 public interface ApiService{
     @GET("posts?&_embed")
-    Single<List<Post>> fetchAllPosts(@Query("page") int pageNo);
+    Single<List<Post>> fetchAllPosts(@Query("page") int pageNo, @Query("per_page") int perPage);
 
     @GET("posts?&_embed")
-    Single<List<Post>> fetchPostsByCategory(@Query("page") int pageNo, @Query("categories") int category);
+    Single<List<Post>> fetchPostsByCategory(@Query("page") int pageNo, @Query("per_page") int perPage, @Query("categories") int category);
 
     @GET("posts/{id}")
     Single<Post> getPostById(@Path("id") int postId);

@@ -70,6 +70,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     private boolean categoryMode = false;
     private int categoryId;
     private RecyclerViewScrollListener recyclerViewScrollListener;
+    private static final int LOAD_PER_PAGE = 14;
 
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
@@ -122,27 +123,10 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             public void onClick(View view, int position) {
                 // open full post
                 Post post = postsList.get(position);
-                /*
-                int index = post.getId();
-                Intent showFullScreen = new Intent(Home.this, DisplayPost.class);
-                showFullScreen.putExtra("_id", index);
-                showFullScreen.putExtra("_link", post.getLink());
-                startActivity(showFullScreen);
-
-                Context context = Home.this;
-                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                //builder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left);
-                //builder.setExitAnimations(context, R.anim.slide_in_left, R.anim.slide_out_right);
-                builder.setToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary));
-                builder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary));
-                builder.enableUrlBarHiding();
-                CustomTabsIntent intent = builder.build();
-                intent.intent.setPackage("com.android.chrome");
-                intent.launchUrl(context, Uri.parse(post.getLink()));
-                */
-
                 Intent startNativeDisplayPostActivity = new Intent(Home.this, DisplayPostActivity.class);
                 startNativeDisplayPostActivity.putExtra("post_id", post.getId());
+                startNativeDisplayPostActivity.putExtra("post_content", post.getContent().getRendered());
+                startNativeDisplayPostActivity.putExtra("post_title", post.getTitle(). getRendered());
                 startActivity(startNativeDisplayPostActivity);
             }
 
@@ -232,7 +216,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         isLoading = true;
         Log.i("fetching", String.valueOf(currentPage));
         compositeDisposable.add(
-                apiService.fetchAllPosts(currentPage)
+                apiService.fetchAllPosts(currentPage, LOAD_PER_PAGE)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
@@ -275,7 +259,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         isLoading = true;
         Log.i("fetching", String.valueOf(currentPage));
         compositeDisposable.add(
-                apiService.fetchAllPosts(currentPage)
+                apiService.fetchAllPosts(currentPage, LOAD_PER_PAGE)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeWith(new DisposableSingleObserver<List<Post>>(){
@@ -400,7 +384,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         currentPage = 1;
         Log.i("fetching", String.valueOf(currentPage) + " by category");
         compositeDisposable.add(
-                apiService.fetchPostsByCategory(currentPage, slug)
+                apiService.fetchPostsByCategory(currentPage, LOAD_PER_PAGE, slug)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
@@ -444,7 +428,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         mAdapter.notifyDataSetChanged();
         Log.i("fetching", String.valueOf(currentPage) + " by category");
         compositeDisposable.add(
-                apiService.fetchPostsByCategory(currentPage, categoryId)
+                apiService.fetchPostsByCategory(currentPage,LOAD_PER_PAGE, categoryId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
