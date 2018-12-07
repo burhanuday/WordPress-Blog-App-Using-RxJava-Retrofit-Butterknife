@@ -29,8 +29,6 @@ import io.reactivex.schedulers.Schedulers;
 public class DisplayPostActivity extends AppCompatActivity {
 
     private int postId;
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private ApiService apiService;
     private String content;
     private String title;
 
@@ -50,8 +48,6 @@ public class DisplayPostActivity extends AppCompatActivity {
         postId = intent.getIntExtra("post_id", 0);
         content = intent.getStringExtra("post_content");
         title = intent.getStringExtra("post_title");
-        apiService = ApiClient.getClient(getApplicationContext()).create(ApiService.class);
-
         setUpWebView();
     }
 
@@ -80,18 +76,11 @@ public class DisplayPostActivity extends AppCompatActivity {
 
         content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/style.css\" />" +
                 "<script src=\"file:///android_asset/prism.js\" type=\"text/javascript\"></script>" +
-                "<div class=\"content\">" + content+ "</div>";
+                "<div class=\"content\">" + "<h1>" + title + "</h1>" + content+ "</div>";
         Log.i("htmlContent", content);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        webView.setWebViewClient(new WebViewClient(){
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                view.loadUrl(request.getUrl().toString());
-                return true;
-            }
-        });
-        webView.loadDataWithBaseURL("file:///android_asset/",content,
-                "text/html; charset=utf-8", "UTF-8", null);
+        webView.loadDataWithBaseURL("file:///android_asset/*",content,
+                "text/html", "UTF-8", null);
     }
 
 }
