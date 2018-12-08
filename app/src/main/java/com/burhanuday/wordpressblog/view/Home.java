@@ -37,8 +37,10 @@ import com.burhanuday.wordpressblog.network.ApiClient;
 import com.burhanuday.wordpressblog.network.ApiService;
 import com.burhanuday.wordpressblog.network.model.Category;
 import com.burhanuday.wordpressblog.network.model.Post;
+import com.burhanuday.wordpressblog.service.ServiceUtility;
 import com.burhanuday.wordpressblog.utils.MyDividerItemDecoration;
 import com.burhanuday.wordpressblog.utils.PostAdapter;
+import com.burhanuday.wordpressblog.utils.PrefUtils;
 import com.burhanuday.wordpressblog.utils.RecyclerTouchListener;
 import com.burhanuday.wordpressblog.utils.RecyclerViewScrollListener;
 
@@ -161,6 +163,8 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
 
         Intent showSplashScreen = new Intent(Home.this, SplashScreen.class);
         startActivity(showSplashScreen);
+
+        ServiceUtility.scheduleChargingReminder(getApplicationContext());
     }
 
     /**
@@ -222,6 +226,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                 .subscribeWith(new DisposableSingleObserver<List<Post>>(){
                     @Override
                     public void onSuccess(List<Post> posts) {
+                        PrefUtils.saveLatestId(Home.this, posts.get(0).getId());
                         postsList.clear();
                         postsList.addAll(posts);
                         isLoading = false;

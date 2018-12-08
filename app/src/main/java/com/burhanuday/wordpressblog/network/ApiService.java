@@ -28,4 +28,7 @@ public interface ApiService{
 
     @GET("categories")
     Single<List<Category>> getAllCategories();
+
+    @GET("posts?&_embed")
+    Single<List<Post>> getFirstPost(@Query("page") int pageNo, @Query("per_page") int perPage);
 }

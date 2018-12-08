@@ -76,7 +76,7 @@ public class DisplayPost extends AppCompatActivity {
         content = content.replaceAll("\\\\n", "").
                 replaceAll("\\\\r", "").replaceAll("\\\\", "");
 
-        content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" +
+        content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"prism.css\" />" +
                 "<script src=\"prism.js\"></script>" +
                 "<div class=\"content\">" + content+ "</div>";
         //webViewSuite.startLoadData("file:///android_asset/*",content, "text/html; charset=utf-8", "UTF-8");
