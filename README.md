@@ -5,7 +5,7 @@ Wordpress blog is a free solution for creating an Android mobile app for your **
 ![Categories](https://i.imgur.com/QAZB82w.jpg=250x)
 ![Article](https://i.imgur.com/8BJYC2l.jpg=250x)
 # Usage
-### Using Android Studio or IntelliJ IDEA (Recommended):
+### Using Android Studio (Recommended) or IntelliJ IDEA:
 This approach takes more time but is the recommended way of doing it since it is easier to do and leaves less space for error
  - **STEP 1:** If you do not have Android Studio installed, go to this [link](https://developer.android.com/studio/#downloads) and download it. Follow [this](https://www.tutorialspoint.com/android/android_studio.htm) tutorial for setup if you need help.
  -  **STEP 2:** Download this repository. You can either
