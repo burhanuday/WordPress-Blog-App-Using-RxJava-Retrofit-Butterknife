@@ -1,9 +1,9 @@
 
 # Wordpress Blog
 Wordpress blog is a free solution for creating an Android mobile app for your **WORDPRESS** blog. It does not require any advanced knowledge of programming and requires you to follow simple instructions for customisation according to your needs.
-![All articles](https://i.imgur.com/49ERTLB.jpg =250x)
-![Categories](https://i.imgur.com/QAZB82w.jpg =250x)
-![Article](https://i.imgur.com/8BJYC2l.jpg =250x)
+![All articles](https://i.imgur.com/49ERTLB.jpg=250x)
+![Categories](https://i.imgur.com/QAZB82w.jpg=250x)
+![Article](https://i.imgur.com/8BJYC2l.jpg=250x)
 # Usage
 ### Using Android Studio or IntelliJ IDEA (Recommended):
 This approach takes more time but is the recommended way of doing it since it is easier to do and leaves less space for error
